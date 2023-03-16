@@ -1,6 +1,6 @@
-use std::{env, sync::Arc};
-
 use futures::future;
+use std::{env, sync::Arc};
+use tokio::time::{sleep, Duration};
 // use futures::future;
 use tokio::{sync::broadcast, task::JoinHandle};
 #[derive(Clone, Debug)]
@@ -63,13 +63,14 @@ fn dupe_struct(times: usize) -> (Vec<JoinHandle<()>>, usize) {
     let mut a = 0;
     let mut handles = vec![];
     while a < times {
-        let event_data = get_event();
         handles.push(tokio::spawn(async move {
+            let event_data = get_event();
+            sleep(Duration::from_millis(1000)).await; // Hold the data 1 second
             format!("{:#?}", event_data);
         }));
         a += 1;
     }
-    (vec![], times)
+    (handles, times)
 }
 
 fn broadcast_arc(times: usize) -> (Vec<JoinHandle<()>>, usize) {
